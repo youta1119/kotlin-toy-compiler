@@ -1,4 +1,4 @@
-package com.github.youta1119.kotlin.compiler
+package com.github.youta1119.kotlin.config
 
 import org.jetbrains.kotlin.config.CompilerConfigurationKey
 
