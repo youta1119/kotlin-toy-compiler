@@ -60,7 +60,7 @@ class DotNetBackendContext(val environment: KotlinCoreEnvironment, override val 
         )
     }
 
-    private val messageCollector: MessageCollector
+    val messageCollector: MessageCollector
         get() = configuration.getNotNull(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY)
 
     companion object {

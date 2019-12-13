@@ -91,6 +91,7 @@ class K2DotNetCompiler : CLICompiler<K2DotNetCompilerArguments>() {
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
+            args.forEach { println(it) }
             doMain(K2DotNetCompiler(), args)
         }
     }

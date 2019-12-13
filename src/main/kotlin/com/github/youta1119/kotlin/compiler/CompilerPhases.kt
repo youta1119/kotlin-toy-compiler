@@ -12,16 +12,33 @@ internal fun createUnitPhase(
     op: DotNetBackendContext.() -> Unit
 ) = namedOpUnitPhase(name, description, prerequisite, op)
 
-internal val noOpPhase = createUnitPhase(
+internal val frontendPhase = createUnitPhase(
     op = {
-       println("no op")
+        val environment = environment
+        val analyzerWithCompilerReport = AnalyzerWithCompilerReport(
+            messageCollector,
+            environment.configuration.languageVersionSettings
+        )
+        // Build AST and binding info.
+        analyzerWithCompilerReport.analyzeAndReport(environment.getSourceFiles()) {
+            TopDownAnalyzerFacadeForDotNet.analyzeFiles(
+                environment.project,
+                configuration,
+                environment.getSourceFiles()
+            )
+        }
+        if (analyzerWithCompilerReport.hasErrors()) {
+            throw DotNetCompilationException()
+        }
+        moduleDescriptor = analyzerWithCompilerReport.analysisResult.moduleDescriptor
+        bindingContext = analyzerWithCompilerReport.analysisResult.bindingContext
     },
-    name = "NoOp",
-    description = "no-op"
+    name = "Frontend",
+    description = "Frontend builds AST"
 )
 
 val toplevelPhase: CompilerPhase<DotNetBackendContext, Unit, Unit> = namedUnitPhase(
     name = "Compiler",
     description = "The whole compilation process",
-    lower = noOpPhase
+    lower = frontendPhase
 )
