@@ -36,8 +36,8 @@ object TopDownAnalyzerFacadeForDotNet {
         )
         val module = context.module
         builtIns.builtInsModule = module
-        context.setDependencies(module)
-        return analyzeFilesWithGivenTrace(files, BindingTraceContext(), context,configuration)
+        context.setDependencies(listOf(module) + loadStdlibModules(projectContext, configuration))
+        return analyzeFilesWithGivenTrace(files, BindingTraceContext(), context, configuration)
     }
 
     private fun analyzeFilesWithGivenTrace(
@@ -59,4 +59,34 @@ object TopDownAnalyzerFacadeForDotNet {
         analyzerForKonan.analyzeDeclarations(TopDownAnalysisMode.TopLevelDeclarations, files)
         return AnalysisResult.success(trace.bindingContext, moduleContext.module)
     }
+
+    private fun loadStdlibModules(
+        projectContext: ProjectContext,
+        configuration: CompilerConfiguration
+    ): ModuleDescriptorImpl {
+        val stdlibFiles = Files.walk(Paths.get(Distribution.stdlibDir))
+            .filter { it.toFile().extension == "kt" }
+            .map { KotlinSourceRoot(it.toString(), false) }.toList()
+        val ktFiles = createSourceFilesFromSourceRoots(configuration, projectContext.project, stdlibFiles)
+        val builtIns = DotNetBuiltIns(projectContext.storageManager)
+        val context = ContextForNewModule(
+            projectContext,
+            STDLIB_MODULE_NAME,
+            builtIns, null
+        )
+        val module = context.module
+        builtIns.builtInsModule = module
+        context.setDependencies(module)
+        val analyzerForKonan = createTopDownAnalyzerForDotNet(
+            context, BindingTraceContext(),
+            FileBasedDeclarationProviderFactory(context.storageManager, ktFiles),
+            configuration.get(CommonConfigurationKeys.LANGUAGE_VERSION_SETTINGS)!!
+        )
+
+        analyzerForKonan.analyzeDeclarations(TopDownAnalysisMode.TopLevelDeclarations, ktFiles)
+        return context.module
+
+    }
+
+    private val STDLIB_MODULE_NAME = Name.special("<stdlib>")
 }
