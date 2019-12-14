@@ -14,6 +14,7 @@ import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.descriptors.ModuleDescriptor
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.declarations.IrFile
+import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.descriptors.IrBuiltIns
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.resolve.BindingContext
@@ -22,7 +23,7 @@ class DotNetBackendContext(val environment: KotlinCoreEnvironment, override val 
     CommonBackendContext {
     lateinit var moduleDescriptor: ModuleDescriptor
     lateinit var bindingContext: BindingContext
-
+    lateinit var irModule: IrModuleFragment
     val phaseConfig = configuration.get(CLIConfigurationKeys.PHASE_CONFIG)!!
 
     val outputName = configuration.get(DotNetConfigurationKeys.OUTPUT_NAME) ?: DEFAULT_OUTPUT_NAME
