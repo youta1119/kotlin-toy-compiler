@@ -18,6 +18,7 @@ import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.descriptors.IrBuiltIns
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.resolve.BindingContext
+import org.jetbrains.kotlin.util.removeSuffixIfPresent
 
 class DotNetBackendContext(val environment: KotlinCoreEnvironment, override val configuration: CompilerConfiguration) :
     CommonBackendContext {
@@ -26,7 +27,14 @@ class DotNetBackendContext(val environment: KotlinCoreEnvironment, override val 
     lateinit var irModule: IrModuleFragment
     val phaseConfig = configuration.get(CLIConfigurationKeys.PHASE_CONFIG)!!
 
-    val outputName = configuration.get(DotNetConfigurationKeys.OUTPUT_NAME) ?: DEFAULT_OUTPUT_NAME
+    val outputFileName = configuration.get(DotNetConfigurationKeys.OUTPUT_NAME)?.let {
+        if (it.endsWith(".exe")) {
+            return@let it
+        }
+        "$it.exe"
+    } ?: DEFAULT_OUTPUT_NAME
+
+    val tempFileName  = outputFileName.replace(".exe", ".il")
 
     override val builtIns: DotNetBuiltIns by lazy {
         moduleDescriptor.builtIns as DotNetBuiltIns
@@ -65,7 +73,7 @@ class DotNetBackendContext(val environment: KotlinCoreEnvironment, override val 
         get() = configuration.getNotNull(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY)
 
     companion object {
-        private const val DEFAULT_OUTPUT_NAME = "program"
+        private const val DEFAULT_OUTPUT_NAME = "program.exe"
     }
 }
 

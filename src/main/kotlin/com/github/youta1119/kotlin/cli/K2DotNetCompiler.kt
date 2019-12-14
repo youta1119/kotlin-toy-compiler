@@ -73,6 +73,7 @@ class K2DotNetCompiler : CLICompiler<K2DotNetCompilerArguments>() {
                 arguments.outputName?.let { put(OUTPUT_NAME, it) }
             }
         }
+
     }
 
     override fun createArguments(): K2DotNetCompilerArguments =

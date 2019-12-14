@@ -17,4 +17,5 @@ gradle-app.setting
 
 
 *.exe
+*il
 dist/lib
